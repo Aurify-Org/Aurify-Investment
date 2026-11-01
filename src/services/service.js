@@ -104,8 +104,15 @@ const investmentCreate = async (userID, request) => {
 const investmentSell = async (userID, request) => {
   const body = validate(sellInvestmentValidation, request);
 
+  //~ Only the seller's own lots: without userId a sale drew down other users'
+  //~ holdings of the same asset, oldest first.
   const investments = await prismaClient.investment.findMany({
-    where: { code: body.assetcode, quantity: { gt: 0 }, deletedAt: null },
+    where: {
+      userId: userID,
+      code: body.assetcode,
+      quantity: { gt: 0 },
+      deletedAt: null,
+    },
     select: { id: true, initialValuation: true, quantity: true, amount: true },
     orderBy: { createdAt: "asc" },
   });

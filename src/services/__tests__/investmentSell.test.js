@@ -355,3 +355,21 @@ describe("investmentSell", () => {
     ).rejects.toThrow("transaction failed");
   });
 });
+
+describe("investmentSell — ownership", () => {
+  afterEach(() => jest.clearAllMocks());
+
+  it("only sells from the seller's own lots", async () => {
+    mockInvestmentFindMany.mockResolvedValue([]);
+
+    await expect(
+      service.investmentSell(USER_ID, sampleSellRequest()),
+    ).rejects.toThrow();
+
+    expect(mockInvestmentFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ userId: USER_ID, code: "XAU" }),
+      }),
+    );
+  });
+});
